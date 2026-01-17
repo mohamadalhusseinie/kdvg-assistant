@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KDVG Assistant
 
-## Getting Started
+Draft assistant for German conscientious objection (Kriegsdienstverweigerung, Art. 4(3) GG). The app guides users through a step-by-step wizard to collect personal data and conscience-based justification, then generates a printable PDF bundle (cover letter, justification, tabular CV). It never submits documents or provides legal representation.
 
-First, run the development server:
+## Features
+
+- Guided multi-step wizard with validation for status, personal data, conscience grounds, and declarations
+- PDF bundle generation in-browser (cover letter, justification, CV) ready for download/printing
+- Structured data schema with safe defaults to keep outputs consistent and legally aligned
+- Responsive UI with reusable form components and accessible defaults
+- Clear disclaimers; no backend submission or legal advice
+
+## Tech Stack
+
+- Next.js (App Router) with React and TypeScript
+- Zod schemas for validation and mapping to PDF data
+- Tailwind/shadcn-style UI components in `components/ui`
+- PDF templating utilities in `lib/pdf`
+
+## Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 to use the wizard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` – start the development server
+- `npm run build` – create a production build
+- `npm start` – serve the production build
+- `npm run lint` – lint the codebase
 
-## Learn More
+## Project Structure (high level)
 
-To learn more about Next.js, take a look at the following resources:
+- `app/` – Next.js routes and pages (wizard under `app/wizard`)
+- `components/` – shared UI components and wizard-specific parts
+- `features/wizard/` – form schema, defaults, and step configuration
+- `lib/pdf/` – PDF generation logic and templates
+- `public/` – static assets
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## PDF Generation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+User input is mapped via `features/wizard/mapToPdf.ts` into PDF-ready data and rendered with templates in `lib/pdf/templates.ts`. Downloads happen client-side; no data is sent to a server.
 
-## Deploy on Vercel
+## Data & Privacy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+All data stays in the browser session. Users must download and submit documents themselves. No legal advice or representation is provided.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+Standard Next.js deployment flow applies (e.g., Vercel). Build with `npm run build` and serve with `npm start`.
+
+## Contributing
+
+- Keep schemas, defaults, and UI in sync with the question catalog
+- Maintain accessibility for all form controls and PDF download flows
+- Add tests for validation changes and PDF mapping
+
+## License
+
+TBD. Replace this section with the chosen license before release.

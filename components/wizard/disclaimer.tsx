@@ -4,7 +4,7 @@ export function LegalDisclaimer() {
       <p className="font-semibold">Wichtiger Hinweis</p>
       <ul className="mt-2 list-disc space-y-1 pl-5">
         <li>Die Anwendung erstellt Entwürfe. Sie versendet <strong>keine</strong> Anträge.</li>
-        <li>Keine Rechtsberatung. Prüfen Sie Ihre Angaben vor dem Versand an die zuständige Stelle.</li>
+        <li>Prüfen Sie Ihre Angaben vor dem Versand an die zuständige Stelle.</li>
         <li>PDFs werden ausschließlich lokal im Browser generiert und nicht gespeichert.</li>
       </ul>
     </div>

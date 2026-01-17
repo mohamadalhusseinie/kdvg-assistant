@@ -189,11 +189,11 @@ async function createCoverLetter(data: ApplicationData) {
             cursor = result.cursor - LINE_HEIGHT / 2;
         });
 
-    const body = `Sehr geehrte Damen und Herren,\n\nHiermit beantrage ich die Anerkennung als Kriegsdienstverweiger:in gemäß Art. 4 Abs. 3 GG. Ich befinde mich aktuell im Status: ${data.service.status}. Zuständige Stelle / Einheit: ${data.service.unitOrOffice}${
+    const body = `Sehr geehrte Damen und Herren,\n\nHiermit beantrage ich die Anerkennung als Kriegsdienstverweiger:in gemäß Art. 4 Abs. 3 GG. Ich befinde mich aktuell im Status: ${data.service.status}. Zuständige Stelle/Einheit: ${data.service.unitOrOffice}${
         data.service.referenceNumber
             ? ` (Aktenzeichen: ${data.service.referenceNumber})`
             : ""
-    }. ${data.service.pendingDeadlines ? `Bekannte Fristen: ${data.service.pendingDeadlines}.` : ""}\n\nMeine Beweggründe schildere ich in der beigefügten Gewissensbegründung. Ein tabellarischer Lebenslauf liegt bei. Ich bitte um zügige Bearbeitung und Bestätigung des Antragseingangs.\n\nMit freundlichen Grüßen,\n${data.personal.firstName} ${data.personal.lastName}`;
+    }. ${data.service.pendingDeadlines ? `Bekannte Fristen: ${data.service.pendingDeadlines}.` : ""}\n\nMeine Beweggründe schildere ich in der beigefügten Gewissensbegründung. Ein tabellarischer Lebenslauf liegt bei. Ich bitte um zügige Bearbeitung und Bestätigung des Antragseingangs.\n\nMit freundlichen Grüßen,\n\n${data.personal.firstName} ${data.personal.lastName}`;
 
     const bodyResult = addTextBlock({
         doc,

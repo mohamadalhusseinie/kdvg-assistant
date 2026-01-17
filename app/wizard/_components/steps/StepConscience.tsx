@@ -183,7 +183,7 @@ export function StepConscience({ methods }: { methods: UseFormReturn<WizardFormV
                 </div>
             )}
 
-            <div className="grid gap-4">
+            <div className="grid gap-3">
                 <LegalDisclaimer />
 
                 <label className="flex items-center gap-3">
@@ -195,7 +195,7 @@ export function StepConscience({ methods }: { methods: UseFormReturn<WizardFormV
                         )}
                     />
                     <span className="text-sm font-medium">
-            Ich bestätige: kein Versand, keine Rechtsberatung, alles bleibt lokal.
+            Ich bestätige die Hinweise gelesen und verstanden zu haben.
           </span>
                 </label>
                 <FieldError message={methods.formState.errors.consentNoSubmission?.message} />
@@ -209,7 +209,7 @@ export function StepConscience({ methods }: { methods: UseFormReturn<WizardFormV
                         )}
                     />
                     <span className="text-sm font-medium">
-            Ich bestätige: Angaben wahrheitsgemäß und eigenverantwortlich.
+            Ich bestätige die Angaben wahrheitsgemäß und eigenverantwortlich ausgefüllt zu haben.
           </span>
                 </label>
                 <FieldError message={methods.formState.errors.truthConfirmed?.message} />
