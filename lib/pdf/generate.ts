@@ -128,9 +128,15 @@ function addTextBlock({
     return { page, cursor };
 }
 
-function buildAddressBlock(data: ApplicationData) {
+function buildSenderBlock(data: ApplicationData) {
     const { personal } = data;
-    return `${personal.firstName} ${personal.lastName}\n${personal.street}\n${personal.postalCode} ${personal.city}`;
+    return [
+        `${personal.firstName} ${personal.lastName}`,
+        personal.street,
+        `${personal.postalCode} ${personal.city}`,
+        "",
+        `${personal.email} · ${personal.phone}`,
+    ].join("\n");
 }
 
 function buildHeader(page: PDFPage, font: PDFFont, title: string, subtitle?: string) {
@@ -163,6 +169,8 @@ async function createCoverLetter(data: ApplicationData) {
     const doc = await PDFDocument.create();
     const font = await doc.embedFont(StandardFonts.Helvetica);
     let page = doc.addPage();
+
+    // Title
     let cursor = buildHeader(
         page,
         font,
@@ -170,30 +178,81 @@ async function createCoverLetter(data: ApplicationData) {
         "Art. 4 Abs. 3 Grundgesetz",
     );
 
-    const applicantAddress = buildAddressBlock(data);
-    const authorityAddress = `${data.service.unitOrOffice}\n- Kriegsdienstverweigerung -`;
+    // --- Proper letterhead: Sender (right) + Recipient (left) + Date (right) ---
+    const sender = buildSenderBlock(data);
+    const recipient = [
+        "Bundesamt für das Personalmanagement\nder Bundeswehr",
+        "- Wehrersatzbehörde -",
+        "Militärringstraße 1000",
+        "50737 Köln",
+    ].join("\n");
     const dateLine = `${data.personal.city}, ${formatDate(new Date())}`;
 
-    [{ label: applicantAddress }, { label: authorityAddress }, { label: dateLine }]
-        .filter(Boolean)
-        .forEach((item) => {
-            const result = addTextBlock({
-                doc,
-                page,
-                font,
-                text: item.label ?? "",
-                y: cursor,
-                fontSize: FONT_SIZE,
-            });
-            page = result.page;
-            cursor = result.cursor - LINE_HEIGHT / 2;
-        });
+    // Layout positions
+    const leftX = PAGE_MARGIN;
+    const rightX = page.getWidth() / 3 * 2; // simple right column
+    let y = cursor;
 
-    const body = `Sehr geehrte Damen und Herren,\n\nHiermit beantrage ich die Anerkennung als Kriegsdienstverweiger:in gemäß Art. 4 Abs. 3 GG. Ich befinde mich aktuell im Status: ${data.service.status}. Zuständige Stelle/Einheit: ${data.service.unitOrOffice}${
-        data.service.referenceNumber
-            ? ` (Aktenzeichen: ${data.service.referenceNumber})`
-            : ""
-    }. ${data.service.pendingDeadlines ? `Bekannte Fristen: ${data.service.pendingDeadlines}.` : ""}\n\nMeine Beweggründe schildere ich in der beigefügten Gewissensbegründung. Ein tabellarischer Lebenslauf liegt bei. Ich bitte um zügige Bearbeitung und Bestätigung des Antragseingangs.\n\nMit freundlichen Grüßen,\n\n${data.personal.firstName} ${data.personal.lastName}`;
+    // Sender block (right column)
+    const senderLines = sender.split("\n");
+    senderLines.forEach((line) => {
+        page.drawText(line, {
+            x: rightX,
+            y,
+            size: FONT_SIZE,
+            font,
+            color: rgb(0.08, 0.08, 0.08),
+        });
+        y -= LINE_HEIGHT;
+    });
+
+    // Recipient block (left column)
+    let yRecipient = cursor;
+    const recipientLines = recipient.split("\n");
+    recipientLines.forEach((line) => {
+        page.drawText(line, {
+            x: leftX,
+            y: yRecipient,
+            size: FONT_SIZE,
+            font,
+            color: rgb(0.08, 0.08, 0.08),
+        });
+        yRecipient -= LINE_HEIGHT;
+    });
+
+    // Move cursor below the lower of both blocks
+    cursor = Math.min(y, yRecipient) - LINE_HEIGHT;
+
+    // Date line (right column, below blocks)
+    page.drawText(dateLine, {
+        x: rightX,
+        y: cursor,
+        size: FONT_SIZE,
+        font,
+        color: rgb(0.08, 0.08, 0.08),
+    });
+    cursor -= LINE_HEIGHT * 2;
+
+    // Subject line
+    page.drawText("Betreff: Antrag auf Anerkennung als Kriegsdienstverweiger:in", {
+        x: PAGE_MARGIN,
+        y: cursor,
+        size: FONT_SIZE,
+        font,
+        color: rgb(0.05, 0.05, 0.05),
+    });
+    cursor -= LINE_HEIGHT * 1.8;
+
+    // Body
+    const body = `Sehr geehrte Damen und Herren,
+
+hiermit beantrage ich die Anerkennung als Kriegsdienstverweiger:in gemäß Art. 4 Abs. 3 GG.
+
+Meine Beweggründe schildere ich in der beigefügten Gewissensbegründung. Ein tabellarischer Lebenslauf liegt bei. Ich bitte um Bestätigung des Antragseingangs.
+
+Mit freundlichen Grüßen,
+
+${data.personal.firstName} ${data.personal.lastName}`;
 
     const bodyResult = addTextBlock({
         doc,
@@ -205,11 +264,13 @@ async function createCoverLetter(data: ApplicationData) {
     page = bodyResult.page;
     cursor = bodyResult.cursor;
 
+    // Signature line
     page.drawText("Unterschrift: ______________________________", {
         x: PAGE_MARGIN,
         y: cursor - LINE_HEIGHT,
         size: FONT_SIZE,
         font,
+        color: rgb(0.08, 0.08, 0.08),
     });
 
     return doc.save();
