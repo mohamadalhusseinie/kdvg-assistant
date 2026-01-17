@@ -1,37 +1,37 @@
 import type { WizardFormValues } from "./schema";
 
 export const defaultValues: WizardFormValues = {
-    birthYear: "",
-    serviceStatus: "ungedient",
-    mustered: "nein",
+  birthYear: "",
+  serviceStatus: "ungedient",
+  mustered: "nein",
 
-    fullName: "",
-    street: "",
-    postalCode: "",
-    city: "",
-    birthDate: "",
-    birthPlace: "",
-    nationality: "",
+  fullName: "",
+  street: "",
+  postalCode: "",
+  city: "",
+  birthDate: "",
+  birthPlace: "",
+  nationality: "",
 
-    conscienceBase: "ethisch",
-    conscienceSince: "",
+  conscienceBase: "ethisch",
+  conscienceSince: "",
 
-    centralQuestion: "",
-    rejectionAlways: "ja",
+  centralQuestion: "",
+  rejectionAlways: "ja",
 
-    scenarioWeapon: "",
-    deadlyForceDefense: "",
-    irreversibleReason: "",
+  scenarioWeapon: "",
+  deadlyForceDefense: "",
+  irreversibleReason: "",
 
-    riskReasons: [],
-    experiences: "",
-    changedView: "nein",
-    changedViewDetails: "",
+  riskReasons: [],
+  experiences: "",
+  changedView: "nein",
+  changedViewDetails: "",
 
-    consentNoSubmission: true,
-    truthConfirmed: true,
+  consentNoSubmission: true,
+  truthConfirmed: true,
 
-    signatureCity: "",
+  signatureCity: "",
 
-    cvText: "",
+  cvText: "",
 };
