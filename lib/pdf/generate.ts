@@ -130,13 +130,20 @@ function addTextBlock({
 
 function buildSenderBlock(data: ApplicationData) {
   const { personal } = data;
+
+  const contactParts = [personal.email?.trim(), personal.phone?.trim()].filter((v): v is string =>
+    Boolean(v),
+  );
+  const contactLine = contactParts.join(" · ");
+
   return [
-    `${personal.firstName} ${personal.lastName}`,
-    personal.street,
-    `${personal.postalCode} ${personal.city}`,
-    "",
-    `${personal.email} · ${personal.phone}`,
-  ].join("\n");
+    `${personal.firstName} ${personal.lastName}`.trim(),
+    personal.street?.trim(),
+    `${personal.postalCode} ${personal.city}`.trim(),
+    ...(contactLine ? [contactLine] : []),
+  ]
+    .filter((line): line is string => Boolean(line && line.trim()))
+    .join("\n");
 }
 
 function buildHeader(page: PDFPage, font: PDFFont, title: string, subtitle?: string) {
@@ -178,38 +185,26 @@ async function createCoverLetter(data: ApplicationData) {
     "Art. 4 Abs. 3 Grundgesetz",
   );
 
-  // --- Proper letterhead: Sender (right) + Recipient (left) + Date (right) ---
+  // --- Letterhead: Recipient (left) + Sender + Date (right) ---
+  cursor -= LINE_HEIGHT; // gives recipient some breathing room from the title
+
   const sender = buildSenderBlock(data);
   const recipient = [
-    "Bundesamt für das Personalmanagement\nder Bundeswehr",
+    "Bundesamt für das\nPersonalmanagement der Bundeswehr",
     "- Wehrersatzbehörde -",
     "Militärringstraße 1000",
     "50737 Köln",
   ].join("\n");
   const dateLine = `${data.personal.city}, ${formatDate(new Date())}`;
 
-  // Layout positions
+  // Layout
   const leftX = PAGE_MARGIN;
-  const rightX = (page.getWidth() / 3) * 2; // simple right column
-  let y = cursor;
+  const rightX = (page.getWidth() / 3) * 2; // right column start (adjust if needed)
+  const startY = cursor;
 
-  // Sender block (right column)
-  const senderLines = sender.split("\n");
-  senderLines.forEach((line) => {
-    page.drawText(line, {
-      x: rightX,
-      y,
-      size: FONT_SIZE,
-      font,
-      color: rgb(0.08, 0.08, 0.08),
-    });
-    y -= LINE_HEIGHT;
-  });
-
-  // Recipient block (left column)
-  let yRecipient = cursor;
-  const recipientLines = recipient.split("\n");
-  recipientLines.forEach((line) => {
+  // Recipient block (left)
+  let yRecipient = startY;
+  for (const line of recipient.split("\n")) {
     page.drawText(line, {
       x: leftX,
       y: yRecipient,
@@ -218,20 +213,33 @@ async function createCoverLetter(data: ApplicationData) {
       color: rgb(0.08, 0.08, 0.08),
     });
     yRecipient -= LINE_HEIGHT;
-  });
+  }
 
-  // Move cursor below the lower of both blocks
-  cursor = Math.min(y, yRecipient) - LINE_HEIGHT;
+  // Sender block (right)
+  let ySender = startY;
+  for (const line of sender.split("\n")) {
+    page.drawText(line, {
+      x: rightX,
+      y: ySender,
+      size: FONT_SIZE,
+      font,
+      color: rgb(0.08, 0.08, 0.08),
+    });
+    ySender -= LINE_HEIGHT;
+  }
 
-  // Date line (right column, below blocks)
+  // Date directly under sender block (close to it)
+  const yDate = ySender - LINE_HEIGHT * 0.6;
   page.drawText(dateLine, {
     x: rightX,
-    y: cursor,
+    y: yDate,
     size: FONT_SIZE,
     font,
     color: rgb(0.08, 0.08, 0.08),
   });
-  cursor -= LINE_HEIGHT * 2;
+
+  // Continue below the lowest element (recipient vs date)
+  cursor = Math.min(yRecipient, yDate) - LINE_HEIGHT * 1.6;
 
   // Subject line
   page.drawText("Betreff: Antrag auf Anerkennung als Kriegsdienstverweiger:in", {
