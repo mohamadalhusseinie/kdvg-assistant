@@ -1,11 +1,13 @@
 import type { WizardFormValues } from "./schema";
 
-export const reasonOptions = [
+export const reasonOptions: { value: RiskReason; label: string }[] = [
   { value: "angstKrieg", label: "Angst vor Krieg" },
   { value: "angstTod", label: "Angst vor Tod oder Verletzung" },
   { value: "konkreterKrieg", label: "Ablehnung eines konkreten Krieges" },
   { value: "politischeAblehnung", label: "Politische Ablehnung eines Staates" },
-] as const;
+];
+
+export type RiskReason = "angstKrieg" | "angstTod" | "konkreterKrieg" | "politischeAblehnung";
 
 export type WizardStep = {
   id: "status" | "personal" | "conscience" | "cv" | "review";
