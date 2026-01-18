@@ -288,12 +288,7 @@ async function createJustification(data: ApplicationData) {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   let page = doc.addPage();
-  let cursor = buildHeader(
-    page,
-    font,
-    "Persönliche Gewissensbegründung",
-    `${data.personal.firstName} ${data.personal.lastName}`,
-  );
+  let cursor = buildHeader(page, font, "Persönliche Gewissensbegründung");
 
   const intro = `Ich stelle den Antrag auf Kriegsdienstverweigerung, weil es meinem Gewissen widerspricht, an Handlungen mitzuwirken, die auf den Einsatz von Waffen oder die Vorbereitung militärischer Gewalt gerichtet sind.`;
   const segments = [
@@ -343,7 +338,7 @@ async function createCv(data: ApplicationData) {
   let page = doc.addPage();
   let cursor = buildHeader(page, font, "Tabellarischer Lebenslauf");
 
-  const contact = `${data.personal.firstName} ${data.personal.lastName}\n${data.personal.street}\n${data.personal.postalCode} ${data.personal.city}\n${data.personal.email} | ${data.personal.phone}`;
+  const contact = `${data.personal.firstName} ${data.personal.lastName}\n\n${data.personal.street}\n\n${data.personal.postalCode} ${data.personal.city}\n\n`;
   const contactResult = addTextBlock({ doc, page, font, text: contact, y: cursor });
   page = contactResult.page;
   cursor = contactResult.cursor - LINE_HEIGHT / 2;

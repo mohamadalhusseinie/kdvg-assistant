@@ -51,8 +51,8 @@ export const steps: WizardStep[] = [
   {
     id: "cv",
     label: "Lebenslauf",
-    description: "Für MVP reicht freier Text (später strukturieren)",
-    fields: ["cvText"],
+    description: "Tabellarischer Lebenslauf (mindestens ein Eintrag erforderlich)",
+    fields: ["cvEntries"],
   },
   {
     id: "review",

@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+export const cvEntrySchema = z.object({
+  startDate: z.string().min(2, "Startdatum erforderlich (z. B. 03/2020 oder 2020)."),
+  endDate: z.string().min(2, "Enddatum erforderlich (z. B. laufend oder 08/2024)."),
+  title: z.string().min(2, "Tätigkeit/Funktion erforderlich."),
+  organization: z.string().min(2, "Organisation/Arbeitgeber/Schule erforderlich."),
+  description: z.string().min(5, "Kurzbeschreibung erforderlich."),
+});
+
 export const wizardSchema = z
   .object({
     birthYear: z.string().min(4, "Geburtsjahr erforderlich"),
@@ -14,7 +22,7 @@ export const wizardSchema = z
     birthPlace: z.string().min(2, "Geburtsort erforderlich"),
     nationality: z.string().min(2, "Staatsangehörigkeit erforderlich"),
 
-    conscienceBase: z.enum(["religioes", "ethisch", "humanistisch"]),
+    conscienceBase: z.enum(["religiös", "ethisch", "humanistisch"]),
     conscienceSince: z.string().min(8, "Bitte Zeitpunkt und Auslöser angeben"),
 
     centralQuestion: z.string().min(30, "Bitte ausführlicher beschreiben"),
@@ -33,6 +41,8 @@ export const wizardSchema = z
     changedView: z.enum(["ja", "nein"]),
     changedViewDetails: z.string().optional().default(""),
 
+    cvEntries: z.array(cvEntrySchema).min(1, "Mindestens ein Lebenslauf-Eintrag ist erforderlich."),
+
     consentNoSubmission: z.literal(true, {
       message: "Bitte bestätigen (kein Versand/keine Rechtsberatung).",
     }),
@@ -41,9 +51,6 @@ export const wizardSchema = z
     }),
 
     signatureCity: z.string().min(2, "Ort erforderlich"),
-
-    // MVP CV as plain text
-    cvText: z.string().optional().default(""),
   })
   .superRefine((value, ctx) => {
     if (value.changedView === "ja" && !value.changedViewDetails?.trim()) {

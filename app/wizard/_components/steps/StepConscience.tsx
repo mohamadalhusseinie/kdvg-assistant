@@ -29,7 +29,7 @@ export function StepConscience({ methods }: { methods: UseFormReturn<WizardFormV
               className="grid gap-3 md:grid-cols-3"
             >
               {[
-                ["religioes", "religiöse Gewissensentscheidung"],
+                ["religiös", "religiöse Gewissensentscheidung"],
                 ["ethisch", "ethisch-moralische Gewissensentscheidung"],
                 ["humanistisch", "humanistisch / weltanschaulich"],
               ].map(([value, label]) => (

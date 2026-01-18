@@ -28,10 +28,16 @@ export const defaultValues: WizardFormValues = {
   changedView: "nein",
   changedViewDetails: "",
 
+  cvEntries: [
+    {
+      startDate: "",
+      endDate: "laufend",
+      title: "",
+      organization: "",
+      description: "",
+    },
+  ],
   consentNoSubmission: true,
   truthConfirmed: true,
-
   signatureCity: "",
-
-  cvText: "",
 };

@@ -4,22 +4,36 @@ import type { ApplicationData, CvEntry } from "@/lib/pdf/generate";
 function splitName(fullName: string) {
   const parts = fullName.trim().split(/\s+/);
   if (parts.length === 1) return { firstName: parts[0], lastName: "" };
-  return { firstName: parts.slice(0, -1).join(" "), lastName: parts[parts.length - 1] };
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts[parts.length - 1],
+  };
 }
 
-function cvTextToEntries(cvText: string): CvEntry[] {
-  const t = cvText.trim();
-  if (!t) return [];
-  // MVP: keep whole text as one entry
-  return [
-    {
-      startDate: "",
-      endDate: "",
-      title: "Lebenslauf (Freitext)",
-      organization: "",
-      description: t,
-    },
-  ];
+function mapCvEntries(values: WizardFormValues): CvEntry[] {
+  const entries = values.cvEntries ?? [];
+  return entries.map((e) => ({
+    startDate: e.startDate.trim(),
+    endDate: e.endDate.trim(),
+    title: e.title.trim(),
+    organization: e.organization.trim(),
+    description: e.description.trim(),
+  }));
+}
+
+function formatRiskReasons(
+  riskReasons?: Array<"angstKrieg" | "angstTod" | "konkreterKrieg" | "politischeAblehnung">,
+) {
+  const map: Record<string, string> = {
+    angstKrieg: "Angst vor Krieg",
+    angstTod: "Angst vor Tod oder Verletzung",
+    konkreterKrieg: "Ablehnung eines konkreten Krieges",
+    politischeAblehnung: "Politische Ablehnung eines Staates",
+  };
+
+  const list = (riskReasons ?? []).map((r) => map[r] ?? r);
+  if (list.length === 0) return "Keine (oder nicht angegeben).";
+  return list.map((x) => `- ${x}`).join("\n");
 }
 
 export function mapToPdfApplicationData(values: WizardFormValues): ApplicationData {
@@ -40,24 +54,49 @@ export function mapToPdfApplicationData(values: WizardFormValues): ApplicationDa
     },
     service: {
       status: values.serviceStatus,
-      // authorities differ; keep it generic
-      unitOrOffice: "Zuständiges Karrierecenter der Bundeswehr",
+      unitOrOffice: "",
       referenceNumber: "",
       pendingDeadlines: "",
       obligations: `Status: ${values.serviceStatus}, Musterung: ${values.mustered}, Geburtsjahr: ${values.birthYear}`,
     },
     conscience: {
-      conscienceOrigin: `Grundlage: ${values.conscienceBase}\n\nSeit wann: ${values.conscienceSince}\n\nPrägungen: ${values.experiences}${
-        values.changedView === "ja" ? `\n\nVeränderung: ${values.changedViewDetails}` : ""
-      }`,
+      conscienceOrigin: `Grundlage: ${values.conscienceBase}
+
+Entstehung / seit wann (Zeitpunkt + Auslöser):
+${values.conscienceSince}
+
+Prägungen / Erfahrungen:
+${values.experiences}${
+        values.changedView === "ja"
+          ? `
+
+Veränderung der Haltung:
+${values.changedViewDetails}`
+          : ""
+      }
+
+Abgrenzung (nicht ausreichende Motive, falls zutreffend):
+${formatRiskReasons(values.riskReasons)}`,
+
       moralConflict: values.centralQuestion,
-      actionsTaken: `Konfliktszenario (Befehl zum Waffeneinsatz):\n${values.scenarioWeapon}\n\nTödliche Gewalt für staatliche Interessen:\n${values.deadlyForceDefense}\n\nUnumkehrbar:\n${values.irreversibleReason}`,
+
+      actionsTaken: `Konfliktszenario (Befehl zum Waffeneinsatz):
+${values.scenarioWeapon}
+
+Tödliche Gewalt zur Verteidigung staatlicher Interessen:
+${values.deadlyForceDefense}
+
+Unumkehrbarkeit:
+${values.irreversibleReason}`,
+
       refusalScope:
         values.rejectionAlways === "ja"
           ? "Die Verweigerung gilt unabhängig von Gegner, Konflikt oder Umständen."
           : "Hinweis: Die Verweigerung ist nicht universell formuliert (erhöhtes Ablehnungsrisiko).",
     },
-    cv: cvTextToEntries(values.cvText),
+
+    cv: mapCvEntries(values),
+
     consentConfirmed: true,
   };
 }
