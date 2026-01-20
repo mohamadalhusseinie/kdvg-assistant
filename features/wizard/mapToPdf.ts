@@ -43,16 +43,14 @@ function formatRiskReasonsAsAbgrenzung(riskReasons?: RiskReason[]) {
     politischeAblehnung: "politische Ablehnung eines Staates / einer Regierung",
   };
 
-  const list = (riskReasons ?? []).map((r) => map[r]);
+  const list = (riskReasons ?? []).map((r) => map[r]).filter(Boolean);
 
-  if (list.length === 0) {
-    return "";
-  }
+  if (list.length === 0) return "";
 
   return [
     "Mir ist bewusst, dass folgende Aspekte für sich genommen keine Gewissensentscheidung ersetzen. Sie sind nicht der Kern meiner Verweigerung:",
     ...list.map((x) => `- ${x}`),
-  ].join("\n");
+  ].join("\n\n");
 }
 
 function joinParagraphs(...parts: Array<string | undefined>) {
