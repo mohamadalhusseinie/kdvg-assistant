@@ -48,8 +48,18 @@ export function StepReview({ methods }: { methods: UseFormReturn<WizardFormValue
       <p className="text-sm text-muted-foreground">
         Prüfen Sie Ihre Angaben kurz. Der Download erzeugt{" "}
         <span className="font-medium">3 PDFs</span> (Anschreiben, Begründung, Lebenslauf) in einem
-        Bundle.
+        Bundle. Die Kopie von Ausweis/Geburtsurkunde fügen Sie separat bei.
       </p>
+
+      <div className="rounded-lg border bg-card p-3 text-sm">
+        <p className="font-medium">Einreichung:</p>
+        <p className="mt-2 whitespace-pre-wrap text-muted-foreground">
+          Bundesamt für das Personalmanagement der Bundeswehr{"\n"}
+          Abt. II ZA Wehrersatz{"\n"}
+          Militärringstraße 1000{"\n"}
+          50737 Köln
+        </p>
+      </div>
 
       {hasRiskReasons && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -93,21 +103,21 @@ export function StepReview({ methods }: { methods: UseFormReturn<WizardFormValue
 
         <div className="grid gap-2">
           <div className="text-sm text-muted-foreground">Seit wann / Auslöser</div>
-          <div className="rounded-md border bg-muted/30 p-3 text-sm whitespace-pre-wrap">
+          <div className="whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
             {v.conscienceSince?.trim() || "—"}
           </div>
         </div>
 
         <div className="grid gap-2">
           <div className="text-sm text-muted-foreground">Zentrale Gewissensfrage</div>
-          <div className="rounded-md border bg-muted/30 p-3 text-sm whitespace-pre-wrap">
+          <div className="whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
             {v.centralQuestion?.trim() || "—"}
           </div>
         </div>
 
         <div className="grid gap-2">
           <div className="text-sm text-muted-foreground">Prägungen / Erfahrungen</div>
-          <div className="rounded-md border bg-muted/30 p-3 text-sm whitespace-pre-wrap">
+          <div className="whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
             {v.experiences?.trim() || "—"}
           </div>
         </div>
@@ -115,7 +125,7 @@ export function StepReview({ methods }: { methods: UseFormReturn<WizardFormValue
         {v.changedView === "ja" && (
           <div className="grid gap-2">
             <div className="text-sm text-muted-foreground">Veränderung der Haltung</div>
-            <div className="rounded-md border bg-muted/30 p-3 text-sm whitespace-pre-wrap">
+            <div className="whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
               {v.changedViewDetails?.trim() || "—"}
             </div>
           </div>
@@ -129,7 +139,7 @@ export function StepReview({ methods }: { methods: UseFormReturn<WizardFormValue
               <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
                 <div className="text-sm font-medium">
                   {e.title || "—"}{" "}
-                  <span className="text-muted-foreground font-normal">
+                  <span className="font-normal text-muted-foreground">
                     {e.organization ? `(${e.organization})` : ""}
                   </span>
                 </div>
@@ -137,13 +147,17 @@ export function StepReview({ methods }: { methods: UseFormReturn<WizardFormValue
                   {e.startDate || "—"} – {e.endDate || "—"}
                 </div>
               </div>
-              <div className="mt-2 text-sm whitespace-pre-wrap">{e.description?.trim() || "—"}</div>
+              <div className="mt-2 whitespace-pre-wrap text-sm">{e.description?.trim() || "—"}</div>
             </div>
           ))}
         </div>
       </Block>
 
       <Block title="Bestätigungen">
+        <Line
+          label="Kopie Personalausweis oder Geburtsurkunde wird beigelegt"
+          value={v.idCopyConfirmed ? "✔ Bestätigt" : "✖ Fehlt"}
+        />
         <Line
           label="Kein Versand / keine Rechtsberatung"
           value={v.consentNoSubmission ? "✔ Bestätigt" : "✖ Fehlt"}

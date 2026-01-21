@@ -24,9 +24,6 @@ export type ApplicationData = {
   };
   service: {
     status: string;
-    unitOrOffice: string;
-    referenceNumber: string;
-    pendingDeadlines: string;
     obligations: string;
   };
   conscience: {
@@ -67,26 +64,27 @@ function wrapLines({
   const lines: string[] = [];
   let current = "";
 
-  words.forEach((word) => {
+  for (const word of words) {
     const tentative = current ? `${current} ${word}` : word;
     const width = font.widthOfTextAtSize(tentative, fontSize);
     if (width <= maxWidth) {
       current = tentative;
     } else {
-      if (current) {
-        lines.push(current);
-      }
+      if (current) lines.push(current);
       current = word;
     }
-  });
-
-  if (current) {
-    lines.push(current);
   }
+  if (current) lines.push(current);
 
   return lines;
 }
 
+/**
+ * IMPORTANT FIX:
+ * - Paragraphs are separated by blank lines (\n\n)
+ * - Within a paragraph, single newlines (\n) are *hard line breaks*
+ * This prevents lists/bullets being collapsed into one long line.
+ */
 function addTextBlock({
   doc,
   page,
@@ -104,26 +102,45 @@ function addTextBlock({
 }) {
   let cursor = y;
   const maxWidth = page.getWidth() - PAGE_MARGIN * 2;
-  const paragraphs = text.split(/\n\n+/u).map((p) => p.trim());
 
-  paragraphs.forEach((paragraph) => {
-    const lines = wrapLines({ text: paragraph, maxWidth, font, fontSize });
-    lines.forEach((line) => {
-      if (cursor < PAGE_MARGIN + LINE_HEIGHT) {
-        page = doc.addPage();
-        cursor = page.getHeight() - PAGE_MARGIN;
+  const paragraphs = text
+    .split(/\n\n+/u)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  for (const paragraph of paragraphs) {
+    const hardLines = paragraph.split("\n");
+
+    for (const hardLineRaw of hardLines) {
+      const hardLine = hardLineRaw.trimEnd();
+
+      // empty hard line -> small vertical gap
+      if (!hardLine.trim()) {
+        cursor -= LINE_HEIGHT / 2;
+        continue;
       }
-      page.drawText(line, {
-        x: PAGE_MARGIN,
-        y: cursor,
-        size: fontSize,
-        font,
-        color: rgb(0.08, 0.08, 0.08),
-      });
-      cursor -= LINE_HEIGHT;
-    });
+
+      const wrapped = wrapLines({ text: hardLine, maxWidth, font, fontSize });
+
+      for (const line of wrapped) {
+        if (cursor < PAGE_MARGIN + LINE_HEIGHT) {
+          page = doc.addPage();
+          cursor = page.getHeight() - PAGE_MARGIN;
+        }
+
+        page.drawText(line, {
+          x: PAGE_MARGIN,
+          y: cursor,
+          size: fontSize,
+          font,
+          color: rgb(0.08, 0.08, 0.08),
+        });
+        cursor -= LINE_HEIGHT;
+      }
+    }
+
     cursor -= LINE_HEIGHT / 2;
-  });
+  }
 
   return { page, cursor };
 }
@@ -149,6 +166,7 @@ function buildSenderBlock(data: ApplicationData) {
 function buildHeader(page: PDFPage, font: PDFFont, title: string, subtitle?: string) {
   const x = PAGE_MARGIN;
   let y = page.getHeight() - PAGE_MARGIN;
+
   page.drawText(title, {
     x,
     y,
@@ -177,7 +195,6 @@ async function createCoverLetter(data: ApplicationData) {
   const font = await doc.embedFont(StandardFonts.Helvetica);
   let page = doc.addPage();
 
-  // Title
   let cursor = buildHeader(
     page,
     font,
@@ -185,21 +202,22 @@ async function createCoverLetter(data: ApplicationData) {
     "Art. 4 Abs. 3 Grundgesetz",
   );
 
-  // --- Letterhead: Recipient (left) + Sender + Date (right) ---
-  cursor -= LINE_HEIGHT; // gives recipient some breathing room from the title
+  // breathing room from title -> recipient should NOT stick to title
+  cursor -= LINE_HEIGHT * 0.8;
 
   const sender = buildSenderBlock(data);
+
   const recipient = [
     "Bundesamt für das\nPersonalmanagement der Bundeswehr",
-    "- Wehrersatzbehörde -",
+    "Abt. II ZA Wehrersatz",
     "Militärringstraße 1000",
     "50737 Köln",
   ].join("\n");
+
   const dateLine = `${data.personal.city}, ${formatDate(new Date())}`;
 
-  // Layout
   const leftX = PAGE_MARGIN;
-  const rightX = (page.getWidth() / 3) * 2; // right column start (adjust if needed)
+  const rightX = (page.getWidth() / 3) * 2;
   const startY = cursor;
 
   // Recipient block (left)
@@ -228,7 +246,7 @@ async function createCoverLetter(data: ApplicationData) {
     ySender -= LINE_HEIGHT;
   }
 
-  // Date directly under sender block (close to it)
+  // Date directly below sender (not far away)
   const yDate = ySender - LINE_HEIGHT * 0.6;
   page.drawText(dateLine, {
     x: rightX,
@@ -238,10 +256,8 @@ async function createCoverLetter(data: ApplicationData) {
     color: rgb(0.08, 0.08, 0.08),
   });
 
-  // Continue below the lowest element (recipient vs date)
-  cursor = Math.min(yRecipient, yDate) - LINE_HEIGHT * 1.6;
+  cursor = Math.min(yRecipient, yDate) - LINE_HEIGHT * 1.2;
 
-  // Subject line
   page.drawText("Betreff: Antrag auf Anerkennung als Kriegsdienstverweiger:in", {
     x: PAGE_MARGIN,
     y: cursor,
@@ -251,28 +267,25 @@ async function createCoverLetter(data: ApplicationData) {
   });
   cursor -= LINE_HEIGHT * 1.8;
 
-  // Body
   const body = `Sehr geehrte Damen und Herren,
 
 hiermit beantrage ich die Anerkennung als Kriegsdienstverweiger:in gemäß Art. 4 Abs. 3 GG.
 
-Meine Beweggründe schildere ich in der beigefügten Gewissensbegründung. Ein tabellarischer Lebenslauf liegt bei. Ich bitte um Bestätigung des Antragseingangs.
+Dem Antrag sind beigefügt:
+- tabellarischer Lebenslauf
+- persönliche schriftliche Gewissensbegründung
+- Kopie des Personalausweises oder der Geburtsurkunde
+
+Ich bitte um Bestätigung des Antragseingangs.
 
 Mit freundlichen Grüßen,
 
 ${data.personal.firstName} ${data.personal.lastName}`;
 
-  const bodyResult = addTextBlock({
-    doc,
-    page,
-    font,
-    text: body,
-    y: cursor,
-  });
+  const bodyResult = addTextBlock({ doc, page, font, text: body, y: cursor });
   page = bodyResult.page;
   cursor = bodyResult.cursor;
 
-  // Signature line
   page.drawText("Unterschrift: ______________________________", {
     x: PAGE_MARGIN,
     y: cursor - LINE_HEIGHT,
@@ -290,7 +303,9 @@ async function createJustification(data: ApplicationData) {
   let page = doc.addPage();
   let cursor = buildHeader(page, font, "Persönliche Gewissensbegründung");
 
-  const intro = `Ich stelle den Antrag auf Kriegsdienstverweigerung, weil es meinem Gewissen widerspricht, an Handlungen mitzuwirken, die auf den Einsatz von Waffen oder die Vorbereitung militärischer Gewalt gerichtet sind.`;
+  const intro =
+    "Ich stelle den Antrag auf Kriegsdienstverweigerung, weil es meinem Gewissen widerspricht, an Handlungen mitzuwirken, die auf den Einsatz von Waffen oder die Vorbereitung militärischer Gewalt gerichtet sind.";
+
   const segments = [
     { heading: "Entstehung des Gewissenskonflikts", text: data.conscience.conscienceOrigin },
     { heading: "Weshalb Waffengewalt unvereinbar ist", text: data.conscience.moralConflict },
@@ -302,7 +317,7 @@ async function createJustification(data: ApplicationData) {
   page = introResult.page;
   cursor = introResult.cursor;
 
-  segments.forEach((segment) => {
+  for (const segment of segments) {
     const headingResult = addTextBlock({
       doc,
       page,
@@ -314,16 +329,10 @@ async function createJustification(data: ApplicationData) {
     page = headingResult.page;
     cursor = headingResult.cursor;
 
-    const textResult = addTextBlock({
-      doc,
-      page,
-      font,
-      text: segment.text,
-      y: cursor,
-    });
+    const textResult = addTextBlock({ doc, page, font, text: segment.text, y: cursor });
     page = textResult.page;
     cursor = textResult.cursor - LINE_HEIGHT / 2;
-  });
+  }
 
   return doc.save();
 }
@@ -338,22 +347,16 @@ async function createCv(data: ApplicationData) {
   let page = doc.addPage();
   let cursor = buildHeader(page, font, "Tabellarischer Lebenslauf");
 
-  const contact = `${data.personal.firstName} ${data.personal.lastName}\n\n${data.personal.street}\n\n${data.personal.postalCode} ${data.personal.city}\n\n`;
+  const contact = `${data.personal.firstName} ${data.personal.lastName}\n${data.personal.street}\n${data.personal.postalCode} ${data.personal.city}`;
   const contactResult = addTextBlock({ doc, page, font, text: contact, y: cursor });
   page = contactResult.page;
   cursor = contactResult.cursor - LINE_HEIGHT / 2;
 
-  data.cv.forEach((entry) => {
-    const sectionResult = addTextBlock({
-      doc,
-      page,
-      font,
-      text: renderCvEntry(entry),
-      y: cursor,
-    });
+  for (const entry of data.cv) {
+    const sectionResult = addTextBlock({ doc, page, font, text: renderCvEntry(entry), y: cursor });
     page = sectionResult.page;
     cursor = sectionResult.cursor;
-  });
+  }
 
   return doc.save();
 }
@@ -384,6 +387,5 @@ export async function generatePdfBundle(data: ApplicationData): Promise<PdfBundl
   }
 
   const saved = await bundleDoc.save();
-  const bundleBytes = Uint8Array.from(saved);
-  return { bundleBytes, parts: resultParts };
+  return { bundleBytes: Uint8Array.from(saved), parts: resultParts };
 }

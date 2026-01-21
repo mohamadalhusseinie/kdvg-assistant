@@ -90,37 +90,40 @@ export default function LandingPage() {
             <CardHeader>
               <CardTitle>Wo wird der Antrag eingereicht?</CardTitle>
               <CardDescription>
-                Kurz: nicht hier, sondern bei den zuständigen Stellen.
+                Laut Auskunft der Bundeswehr: schriftlich an das BAPersBw in Köln.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <p>
-                Anträge auf Kriegsdienstverweigerung werden nicht bei dieser Anwendung, sondern bei
-                staatlichen Stellen eingereicht.
-              </p>
-              <p>
-                In der Regel erfolgt die Antragstellung über das zuständige{" "}
-                <strong>Karrierecenter der Bundeswehr</strong> bzw. das{" "}
-                <strong>Bundesamt für das Personalmanagement der Bundeswehr (BAPersBw)</strong>.
-              </p>
-              <p>
-                Nach der formalen Erfassung wird der Antrag an das{" "}
-                <strong>Bundesamt für Familie und zivilgesellschaftliche Aufgaben (BAFzA)</strong>{" "}
-                zur Entscheidung weitergeleitet.
+                Der Antrag auf Kriegsdienstverweigerung wird schriftlich beim{" "}
+                <strong>Bundesamt für das Personalmanagement der Bundeswehr (BAPersBw)</strong>{" "}
+                eingereicht. Dort wird der Eingang bestätigt und der Antrag zur Entscheidung an das{" "}
+                <strong>BAFzA</strong> weitergeleitet.
               </p>
 
               <div className="rounded-lg border bg-card p-3">
-                <p className="font-medium">Üblicherweise besteht der Antrag aus:</p>
+                <p className="font-medium">Adresse:</p>
+                <p className="mt-2 whitespace-pre-wrap text-muted-foreground">
+                  Bundesamt für das Personalmanagement der Bundeswehr{"\n"}
+                  Abt. II ZA Wehrersatz{"\n"}
+                  Militärringstraße 1000{"\n"}
+                  50737 Köln
+                </p>
+              </div>
+
+              <div className="rounded-lg border bg-card p-3">
+                <p className="font-medium">Der Antrag besteht aus:</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-                  <li>kurzes Anschreiben mit Berufung auf Art. 4 Abs. 3 GG + Unterschrift</li>
+                  <li>Anschreiben mit Berufung auf Art. 4 Abs. 3 GG + Unterschrift</li>
                   <li>tabellarischer Lebenslauf</li>
                   <li>ausführliche, persönliche Gewissensbegründung</li>
+                  <li>Kopie des Personalausweises oder der Geburtsurkunde</li>
                 </ul>
               </div>
 
               <p className="text-muted-foreground">
-                Der Assistent erstellt diese Unterlagen als zusammenhängendes PDF. Die Prüfung,
-                Unterschrift und Einreichung erfolgen eigenverantwortlich.
+                Der Assistent erzeugt Anschreiben, Begründung und Lebenslauf als PDF. Die
+                Ausweis-/Urkundenkopie fügen Sie separat bei.
               </p>
 
               <div className="flex flex-col gap-3 sm:flex-row">
@@ -132,16 +135,6 @@ export default function LandingPage() {
                 >
                   <Button variant="outline" className="w-full sm:w-auto">
                     Offizielle Infos (BAFzA)
-                  </Button>
-                </a>
-                <a
-                  href="https://www.bundeswehrkarriere.de/karrierecenter"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full sm:w-auto"
-                >
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    Karrierecenter finden
                   </Button>
                 </a>
               </div>

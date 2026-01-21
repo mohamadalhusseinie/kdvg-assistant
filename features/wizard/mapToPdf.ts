@@ -1,10 +1,10 @@
 import type { WizardFormValues } from "./schema";
 import type { ApplicationData, CvEntry } from "@/lib/pdf/generate";
-import { RiskReason } from "@/features/wizard/steps";
+import type { RiskReason } from "@/features/wizard/steps";
 
 function splitName(fullName: string) {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+  if (parts.length <= 1) return { firstName: parts[0] ?? "", lastName: "" };
   return {
     firstName: parts.slice(0, -1).join(" "),
     lastName: parts[parts.length - 1],
@@ -12,8 +12,7 @@ function splitName(fullName: string) {
 }
 
 function mapCvEntries(values: WizardFormValues): CvEntry[] {
-  const entries = values.cvEntries ?? [];
-  return entries.map((e) => ({
+  return (values.cvEntries ?? []).map((e) => ({
     startDate: e.startDate.trim(),
     endDate: e.endDate.trim(),
     title: e.title.trim(),
@@ -44,13 +43,13 @@ function formatRiskReasonsAsAbgrenzung(riskReasons?: RiskReason[]) {
   };
 
   const list = (riskReasons ?? []).map((r) => map[r]).filter(Boolean);
-
   if (list.length === 0) return "";
 
   return [
-    "Mir ist bewusst, dass folgende Aspekte für sich genommen keine Gewissensentscheidung ersetzen. Sie sind nicht der Kern meiner Verweigerung:",
+    "Mir ist bewusst, dass die folgenden Punkte für sich genommen keine Gewissensentscheidung ersetzen.",
+    "Sie sind nicht der Kern meiner Verweigerung:",
     ...list.map((x) => `- ${x}`),
-  ].join("\n\n");
+  ].join("\n");
 }
 
 function joinParagraphs(...parts: Array<string | undefined>) {
@@ -62,10 +61,8 @@ function joinParagraphs(...parts: Array<string | undefined>) {
 
 export function mapToPdfApplicationData(values: WizardFormValues): ApplicationData {
   const { firstName, lastName } = splitName(values.fullName);
-
   const abgrenzung = formatRiskReasonsAsAbgrenzung(values.riskReasons);
 
-  // Better structured text blocks for the PDF generator
   const conscienceOrigin = joinParagraphs(
     `Meine Gewissensentscheidung ist ${formatConscienceBase(values.conscienceBase)} begründet.`,
     values.conscienceSince ? `Entstehung / seit wann:\n${values.conscienceSince}` : undefined,
@@ -93,15 +90,12 @@ export function mapToPdfApplicationData(values: WizardFormValues): ApplicationDa
       : undefined,
   );
 
-  // This field in your pdf generator is currently used as a section.
-  // Use it as a short “what I refuse” statement (clean and non-technical).
-  const refusalScope = joinParagraphs(
-    "Ich kann nicht an Handlungen mitwirken, die darauf gerichtet sind, Menschen mit Waffen zu verletzen oder zu töten – auch nicht durch Ausbildung, Vorbereitung oder Unterstützung solcher Handlungen.",
-  );
+  const refusalScope =
+    "Ich kann nicht an Handlungen mitwirken, die darauf gerichtet sind, Menschen mit Waffen zu verletzen oder zu töten – auch nicht durch Ausbildung, Vorbereitung oder Unterstützung solcher Handlungen.";
 
   return {
     personal: {
-      firstName,
+      firstName: firstName || values.fullName,
       lastName,
       dateOfBirth: values.birthDate,
       placeOfBirth: values.birthPlace,
@@ -114,9 +108,6 @@ export function mapToPdfApplicationData(values: WizardFormValues): ApplicationDa
     },
     service: {
       status: values.serviceStatus,
-      unitOrOffice: "",
-      referenceNumber: "",
-      pendingDeadlines: "",
       obligations: `Status: ${values.serviceStatus}, Musterung: ${values.mustered}, Geburtsjahr: ${values.birthYear}`,
     },
     conscience: {
@@ -125,9 +116,7 @@ export function mapToPdfApplicationData(values: WizardFormValues): ApplicationDa
       actionsTaken,
       refusalScope,
     },
-
     cv: mapCvEntries(values),
-
     consentConfirmed: true,
   };
 }

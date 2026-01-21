@@ -215,6 +215,30 @@ export function StepConscience({ methods }: { methods: UseFormReturn<WizardFormV
         </div>
       )}
 
+      <div className="grid gap-3 rounded-lg border bg-card p-4">
+        <p className="text-sm font-medium">Pflichtanlage</p>
+        <p className="text-sm text-muted-foreground">
+          Dem Antrag muss eine{" "}
+          <span className="font-medium">Kopie des Personalausweises</span> oder alternativ der{" "}
+          <span className="font-medium">Geburtsurkunde</span> beigefügt werden.
+        </p>
+
+        <label className="flex items-start gap-3">
+          <Controller
+            control={methods.control}
+            name="idCopyConfirmed"
+            render={({ field }) => (
+              <Checkbox checked={field.value} onCheckedChange={field.onChange} className="mt-0.5" />
+            )}
+          />
+          <span className="text-sm font-medium">
+            Ich bestätige, dass ich eine Kopie von Personalausweis oder Geburtsurkunde dem Antrag
+            beilege.
+          </span>
+        </label>
+        <FieldError message={methods.formState.errors.idCopyConfirmed?.message} />
+      </div>
+
       <div className="grid gap-3">
         <LegalDisclaimer />
 

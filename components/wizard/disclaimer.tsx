@@ -8,6 +8,10 @@ export function LegalDisclaimer() {
         </li>
         <li>Prüfen Sie Ihre Angaben vor dem Versand an die zuständige Stelle.</li>
         <li>PDFs werden ausschließlich lokal im Browser generiert und nicht gespeichert.</li>
+        <li>
+          Eine Kopie des Personalausweises oder der Geburtsurkunde ist beizulegen und wird nicht als
+          PDF erzeugt.
+        </li>
       </ul>
     </div>
   );

@@ -43,12 +43,27 @@ export const wizardSchema = z
 
     cvEntries: z.array(cvEntrySchema).min(1, "Mindestens ein Lebenslauf-Eintrag ist erforderlich."),
 
-    consentNoSubmission: z.literal(true, {
-      message: "Bitte bestätigen (kein Versand/keine Rechtsberatung).",
-    }),
-    truthConfirmed: z.literal(true, {
-      message: "Bitte bestätigen (wahrheitsgemäß/eigenverantwortlich).",
-    }),
+    idCopyConfirmed: z
+      .boolean()
+      .default(false)
+      .refine((v) => v === true, {
+        message:
+          "Bitte bestätigen Sie, dass Sie eine Kopie des Personalausweises oder der Geburtsurkunde beilegen.",
+      }),
+
+    consentNoSubmission: z
+      .boolean()
+      .default(false)
+      .refine((v) => v === true, {
+        message: "Bitte bestätigen (kein Versand/keine Rechtsberatung).",
+      }),
+
+    truthConfirmed: z
+      .boolean()
+      .default(false)
+      .refine((v) => v === true, {
+        message: "Bitte bestätigen (wahrheitsgemäß/eigenverantwortlich).",
+      }),
 
     signatureCity: z.string().min(2, "Ort erforderlich"),
   })

@@ -37,7 +37,10 @@ export const defaultValues: WizardFormValues = {
       description: "",
     },
   ],
-  consentNoSubmission: true,
-  truthConfirmed: true,
+
+  idCopyConfirmed: false,
+  consentNoSubmission: false,
+  truthConfirmed: false,
+
   signatureCity: "",
 };
